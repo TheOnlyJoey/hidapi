@@ -397,27 +397,15 @@ struct hid_device_info HID_API_EXPORT * HID_API_CALL hid_enumerate(unsigned shor
 						break;
 					}
 				}
-			}/*
-			 if (szVid[0] != '\0')
-			 printf("    vid: \"%s\"\n", szVid);
-			 if (szPid[0] != '\0')
-			 printf("    pid: \"%s\"\n", szPid);
-			 if (szMi[0] != '\0')
-			 printf("    mi: \"%s\"\n", szMi);*/
+			}
 
 			pszToken = strtok_s(NULL, "\\#&?", &pszNextToken);
 		}
 
-		char f_vendor_id[200] = "0x", f_product_id[200] = "0x", f_mi[200] = "0x";
-		strcat(f_vendor_id, szVid);
-		strcat(f_product_id, szPid);
-		strcat(f_mi, szMi);
+		unsigned short _vendor_id = (unsigned short)strtoul(szVid, NULL, 16);
+		unsigned short _product_id = (unsigned short)strtoul(szPid, NULL, 16);
+		unsigned short _mi = (unsigned short)strtoul(szMi, NULL, 16);
 
-		//printf("PRE convert Debug V: %s, P: %s\n", f_vendor_id, f_product_id);
-		unsigned short _vendor_id = (unsigned short)strtoul(f_vendor_id, NULL, 16);
-		unsigned short _product_id = (unsigned short)strtoul(f_product_id, NULL, 16);
-		unsigned short _mi = (unsigned short)strtoul(f_mi, NULL, 16);
-		//printf("Debug V: %04hx, P: %04hx\n", _vendor_id, _product_id);
 		/* Check the VID/PID to see if we should add this
 		device to the enumeration list. */
 		if ((vendor_id == 0x0 || _vendor_id == vendor_id) &&
@@ -472,14 +460,14 @@ struct hid_device_info HID_API_EXPORT * HID_API_CALL hid_enumerate(unsigned shor
 			in the path, it's set to -1. */
 			cur_dev->interface_number = -1;
 			if (_mi > 0) {
-				char *interface_component = f_mi;
+				char *interface_component = szMi;
 				if (interface_component) {
 					char *hex_str = interface_component + 4;
 					char *endptr = NULL;
 					cur_dev->interface_number = strtol(hex_str, &endptr, 16);
 					if (endptr == hex_str) {
 						/* The parsing failed. Set interface_number to -1. */
-						cur_dev->interface_number = _mi;
+						cur_dev->interface_number = -1;
 					}
 				}
 			}
