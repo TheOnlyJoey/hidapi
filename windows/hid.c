@@ -375,7 +375,7 @@ struct hid_device_info HID_API_EXPORT * HID_API_CALL hid_enumerate(unsigned shor
 		char* pszNextToken = NULL;
 		const static char* arPrefix[3] = { "vid_", "pid_", "mi_" };
 		unsigned char szVid[200], szPid[200], szMi[200];
-
+		szMi[0] = 0;
 		char devicePath[200];
 		strcpy(devicePath, device_interface_detail_data->DevicePath);
 		pszToken = strtok_s(devicePath, "\\#&?", &pszNextToken);
@@ -453,23 +453,11 @@ struct hid_device_info HID_API_EXPORT * HID_API_CALL hid_enumerate(unsigned shor
 			/* TODO: Release Number */
 			//cur_dev->release_number = attrib.VersionNumber;
 
-			/* Interface Number. It can sometimes be parsed out of the path
-			on Windows if a device has multiple interfaces. See
-			http://msdn.microsoft.com/en-us/windows/hardware/gg487473 or
-			search for "Hardware IDs for HID Devices" at MSDN. If it's not
-			in the path, it's set to -1. */
-			cur_dev->interface_number = -1;
-			if (_mi > 0) {
-				char *interface_component = szMi;
-				if (interface_component) {
-					char *hex_str = interface_component + 4;
-					char *endptr = NULL;
-					cur_dev->interface_number = strtol(hex_str, &endptr, 16);
-					if (endptr == hex_str) {
-						/* The parsing failed. Set interface_number to -1. */
-						cur_dev->interface_number = -1;
-					}
-				}
+			if (szMi[0]) {
+				cur_dev->interface_number = _mi;
+			}
+			else {
+				cur_dev->interface_number = -1; //catch all
 			}
 		}
 
